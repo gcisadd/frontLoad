@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  // axios({
+  //   url: 'http://hmajax.itheima.net/api/register',
+  //   method: 'post',
+  //   data: {
+  //     username: 'GongchiIsAdd',
+  //     password: 'gc000469'
+  //   }
+  // }).then(({data}) => {
+  //   console.log(data)
+  // })
+  axios({
+    url: 'http://hmajax.itheima.net/api/login',
+    method: 'post',
+    data: {
+      username: 'GongchiIsAdd',
+      password: 'gc000469'
+    }
+  }).then(({data}) => {
+    console.log(data)
+  })
+</script>
+</body>
+</html>

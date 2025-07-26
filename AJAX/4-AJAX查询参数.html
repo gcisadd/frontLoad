@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地区查询 - AJAX查询参数</title>
+  <style>
+    /* 全局样式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    /* 容器样式 */
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* 标题样式 */
+    .main-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #3498db;
+      text-align: center;
+    }
+    
+    /* API说明区域 */
+    .api-docs {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .api-docs h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .api-docs ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .api-docs li {
+      margin-bottom: 15px;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .api-docs li::before {
+      content: "•";
+      color: #3498db;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    .api-endpoint {
+      background-color: #e8f4fd;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      color: #2980b9;
+      text-decoration: none;
+      display: inline-block;
+      margin: 5px 0;
+    }
+    
+    .api-endpoint:hover {
+      background-color: #d1ecf1;
+      text-decoration: underline;
+    }
+    
+    .parameter-list {
+      margin-top: 10px;
+    }
+    
+    .parameter-item {
+      margin: 8px 0;
+      padding: 8px 12px;
+      background-color: #fff;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+    }
+    
+    .parameter-name {
+      font-weight: bold;
+      color: #e74c3c;
+    }
+    
+    .parameter-desc {
+      color: #666;
+      margin-left: 10px;
+    }
+    
+    /* 查询表单区域 */
+    .query-form {
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      border: 2px solid #e9ecef;
+      margin-bottom: 25px;
+    }
+    
+    .form-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      align-items: flex-end;
+    }
+    
+    .form-group {
+      flex: 1;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #495057;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #ced4da;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    
+    .query-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      min-width: 120px;
+    }
+    
+    .query-btn:hover {
+      background-color: #2980b9;
+    }
+    
+    .query-btn:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    /* 结果显示区域 */
+    .result-section {
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      border: 2px solid #e9ecef;
+      display: none;
+    }
+    
+    .result-section.show {
+      display: block;
+    }
+    
+    .result-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+    }
+    
+    .result-content {
+      min-height: 100px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .loading::after {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #f5c6cb;
+      margin-bottom: 15px;
+    }
+    
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #c3e6cb;
+      margin-bottom: 15px;
+    }
+    
+    .area-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .area-item {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .area-item:hover {
+      background-color: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .area-name {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+    
+    .area-count {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        padding: 15px;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .area-list {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 主标题 -->
+    <h1 class="main-title">第一步：确定URL和参数说明</h1>
+    
+    <!-- API说明区域 -->
+    <div class="api-docs">
+      <h2>API接口说明</h2>
+      <ul>
+        <li>
+          查询某个省份和城市下的所有地区：
+          <div class="api-endpoint">http://hmajax.itheima.net/api/area</div>
+        </li>
+        <li>
+          参数说明：
+          <div class="parameter-list">
+            <div class="parameter-item">
+              <span class="parameter-name">pname</span>
+              <span class="parameter-desc">省份名称或直辖市名称，如：北京、福建省、辽宁省...</span>
+            </div>
+            <div class="parameter-item">
+              <span class="parameter-name">cname</span>
+              <span class="parameter-desc">城市名称，如：北京市、厦门市、大连市...</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- 查询表单区域 -->
+    <div class="query-form">
+      <h3 class="form-title">地区查询</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">省份名字</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            id="provinceInput" 
+            placeholder="请输入省份名称，如：北京"
+            value="北京"
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label">城市名字</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            id="cityInput" 
+            placeholder="请输入城市名称，如：北京市"
+            value="北京市"
+          >
+        </div>
+        <div class="form-group">
+          <button class="query-btn" id="queryBtn">查询</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 结果显示区域 -->
+    <div class="result-section" id="resultSection">
+      <h3 class="result-title">地区列表：</h3>
+      <div class="result-content" id="resultContent">
+        <div class="loading">正在加载数据...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    /**
+     * 地区查询组件
+     *
+     * @input 用户输入的省份和城市名称
+     * @process 1. 获取用户输入的省份和城市
+     *          2. 发送AJAX请求获取地区数据
+     *          3. 处理响应数据并展示结果
+     * @output 指定省份和城市下的地区列表
+     */
+    
+    // 获取DOM元素
+    const provinceInput = document.getElementById('provinceInput');
+    const cityInput = document.getElementById('cityInput');
+    const queryBtn = document.getElementById('queryBtn');
+    const resultSection = document.getElementById('resultSection');
+    const resultContent = document.getElementById('resultContent');
+    
+    /**
+     * 初始化应用
+     *
+     * @input 页面加载完成
+     * @process 1. 绑定事件监听器
+     *          2. 设置默认值
+     * @output 完整的交互界面
+     */
+    function initApp() {
+      // 绑定查询按钮点击事件
+      queryBtn.addEventListener('click', handleQuery);
+      
+      // 绑定回车键事件
+      provinceInput.addEventListener('keypress', handleEnterKey);
+      cityInput.addEventListener('keypress', handleEnterKey);
+      
+      // 绑定输入框变化事件
+      provinceInput.addEventListener('input', validateInputs);
+      cityInput.addEventListener('input', validateInputs);
+      
+      // 初始验证
+      validateInputs();
+    }
+    
+    /**
+     * 处理回车键事件
+     *
+     * @input 键盘事件
+     * @process 1. 检查是否为回车键
+     *          2. 触发查询操作
+     * @output 执行查询或焦点切换
+     */
+    function handleEnterKey(e) {
+      if (e.key === 'Enter') {
+        if (e.target === provinceInput) {
+          cityInput.focus();
+        } else if (e.target === cityInput) {
+          handleQuery();
+        }
+      }
+    }
+    
+    /**
+     * 验证输入框内容
+     *
+     * @input 输入框的值
+     * @process 1. 检查输入框是否为空
+     *          2. 更新按钮状态
+     * @output 更新后的按钮状态
+     */
+    function validateInputs() {
+      const province = provinceInput.value.trim();
+      const city = cityInput.value.trim();
+      
+      // 启用/禁用查询按钮
+      queryBtn.disabled = !province || !city;
+    }
+    
+    /**
+     * 处理查询按钮点击
+     *
+     * @input 查询按钮点击事件
+     * @process 1. 获取用户输入
+     *          2. 验证输入有效性
+     *          3. 发送AJAX请求
+     *          4. 展示结果
+     * @output 查询结果展示
+     */
+    function handleQuery() {
+      const province = provinceInput.value.trim();
+      const city = cityInput.value.trim();
+      
+      // 验证输入
+      if (!province || !city) {
+        showError('请填写完整的省份和城市信息');
+        return;
+      }
+      
+      // 显示加载状态
+      showLoading();
+      
+      // 发送AJAX请求
+      fetchAreas(province, city);
+    }
+    
+    /**
+     * 获取地区数据
+     *
+     * @input {string} province - 省份名称
+     * @input {string} city - 城市名称
+     * @process 1. 发送AJAX请求
+     *          2. 处理响应数据
+     *          3. 展示结果或错误信息
+     * @output 地区列表数据
+     */
+    function fetchAreas(province, city) {
+      axios({
+        url: 'http://hmajax.itheima.net/api/area',
+        params: {
+          pname: province,
+          cname: city
+        }
+      }).then(({data: {list}}) => {
+        console.log(`获取到的${province}${city}地区数据:`, list);
+        
+        if (list && list.length > 0) {
+          showAreas(province, city, list);
+        } else {
+          showMessage(`未找到${province}${city}的地区数据`, 'info');
+        }
+      }).catch(error => {
+        console.error('获取地区数据失败:', error);
+        
+        let errorMessage = '获取地区数据失败';
+        if (error.response) {
+          // 服务器返回错误状态码
+          if (error.response.status === 404) {
+            errorMessage = `未找到${province}${city}的地区数据`;
+          } else {
+            errorMessage = `服务器错误 (${error.response.status})`;
+          }
+        } else if (error.request) {
+          // 网络错误
+          errorMessage = '网络连接失败，请检查网络设置';
+        }
+        
+        showError(errorMessage);
+      });
+    }
+    
+    /**
+     * 显示地区列表
+     *
+     * @input {string} province - 省份名称
+     * @input {string} city - 城市名称
+     * @input {Array} areas - 地区列表
+     * @process 1. 生成地区列表HTML
+     *          2. 更新结果显示区域
+     * @output 地区列表的HTML展示
+     */
+    function showAreas(province, city, areas) {
+      const successMessage = `成功获取${province}${city}的地区数据，共${areas.length}个地区`;
+      
+      const areasHTML = areas.map(area => `
+        <div class="area-item">
+          <div class="area-name">${area}</div>
+        </div>
+      `).join('');
+      
+      resultContent.innerHTML = `
+        <div class="success-message">${successMessage}</div>
+        <div class="area-list">
+          ${areasHTML}
+        </div>
+      `;
+      
+      resultSection.classList.add('show');
+    }
+    
+    /**
+     * 显示加载状态
+     *
+     * @input 无
+     * @process 1. 显示加载动画
+     *          2. 显示结果区域
+     * @output 加载状态显示
+     */
+    function showLoading() {
+      resultContent.innerHTML = '<div class="loading">正在查询地区数据...</div>';
+      resultSection.classList.add('show');
+    }
+    
+    /**
+     * 显示错误信息
+     *
+     * @input {string} message - 错误消息
+     * @process 1. 生成错误信息HTML
+     *          2. 更新结果显示区域
+     * @output 错误信息展示
+     */
+    function showError(message) {
+      resultContent.innerHTML = `<div class="error-message">${message}</div>`;
+      resultSection.classList.add('show');
+    }
+    
+    /**
+     * 显示普通消息
+     *
+     * @input {string} message - 消息内容
+     * @input {string} type - 消息类型
+     * @process 1. 生成消息HTML
+     *          2. 更新结果显示区域
+     * @output 消息展示
+     */
+    function showMessage(message, type = 'info') {
+      const messageClass = type === 'info' ? 'success-message' : 'error-message';
+      resultContent.innerHTML = `<div class="${messageClass}">${message}</div>`;
+      resultSection.classList.add('show');
+    }
+    
+    // 初始化应用
+    initApp();
+  </script>
+</body>
+</html>

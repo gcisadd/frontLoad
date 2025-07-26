@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AJAX查询参数 - 省份多选</title>
+  <style>
+    /* 容器样式 */
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    
+    /* 标题样式 */
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    /* 多选按钮组样式 */
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    /* 多选按钮容器样式 */
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    
+    /* 多选按钮容器悬停效果 */
+    .checkbox-item:hover {
+      border-color: #007bff;
+      background-color: #f8f9fa;
+    }
+    
+    /* 选中状态样式 */
+    .checkbox-item.selected {
+      border-color: #007bff;
+      background-color: #e3f2fd;
+    }
+    
+    /* 多选按钮样式 */
+    .checkbox-item input[type="checkbox"] {
+      margin: 0;
+      cursor: pointer;
+      pointer-events: none; /* 防止点击checkbox时触发外层点击事件 */
+    }
+    
+    /* 选中状态下的标签样式 */
+    .checkbox-item.selected label {
+      color: #007bff;
+      font-weight: bold;
+    }
+    
+    /* 标签样式 */
+    .checkbox-item label {
+      cursor: pointer;
+      margin: 0;
+      user-select: none;
+      pointer-events: none; /* 防止点击label时触发外层点击事件 */
+    }
+    
+    /* 按钮样式 */
+    .query-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .query-btn:hover {
+      background-color: #0056b3;
+    }
+    
+    .query-btn:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    /* 结果显示区域 */
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      display: none;
+    }
+    
+    .result.show {
+      display: block;
+    }
+    
+    .result.success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    
+    .result.error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    
+    /* 选中数量显示 */
+    .selected-count {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #007bff;
+      font-weight: bold;
+    }
+    
+    /* 城市展示区域 */
+    .cities-container {
+      margin-top: 20px;
+      display: none;
+    }
+    
+    .cities-container.show {
+      display: block;
+    }
+    
+    .cities-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #007bff;
+    }
+    
+    .province-cities {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+    
+    .province-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #007bff;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      background-color: #e3f2fd;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .city-count {
+      font-size: 12px;
+      color: #666;
+      background-color: #fff;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    
+    .cities-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .city-item {
+      padding: 6px 12px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 14px;
+      color: #333;
+      transition: all 0.3s ease;
+    }
+    
+    .city-item:hover {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    /* 加载状态 */
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* 错误状态 */
+    .error-state {
+      color: #dc3545;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>请选择省份（可多选）</h2>
+    
+    <!-- 选中数量显示 -->
+    <div class="selected-count" id="selectedCount">已选择：0 个省份</div>
+    
+    <!-- 多选按钮组容器 -->
+    <div class="checkbox-group" id="provinceGroup"></div>
+    
+    <!-- 查询按钮 -->
+    <button class="query-btn" id="queryBtn" disabled>查询</button>
+    
+    <!-- 结果显示区域 -->
+    <div class="result" id="result"></div>
+    
+    <!-- 城市展示区域 -->
+    <div class="cities-container" id="citiesContainer">
+      <div class="cities-title">城市列表</div>
+      <div id="citiesContent"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    /**
+     * 省份多选器组件
+     *
+     * @input 从API获取的省份列表数据
+     * @process 1. 发送AJAX请求获取省份数据
+     *          2. 动态生成多选按钮组
+     *          3. 监听选择变化并更新UI状态
+     *          4. 处理查询按钮点击事件
+     *          5. 获取并展示城市数据
+     * @output 用户选择的省份信息和对应的城市列表
+     */
+    
+    // 全局变量：存储选中的省份信息数组
+    let selectedProvinces = [];
+    
+    // 全局变量：存储城市数据
+    let citiesData = {};
+    
+    /**
+     * 初始化应用
+     *
+     * @input 页面加载完成
+     * @process 1. 获取省份数据
+     *          2. 渲染多选按钮组
+     *          3. 绑定事件监听器
+     * @output 完整的交互界面
+     */
+    function initApp() {
+      // 获取省份数据
+      fetchProvinces();
+    }
+    
+    /**
+     * 获取省份数据
+     *
+     * @input API接口地址
+     * @process 1. 发送AJAX请求
+     *          2. 处理响应数据
+     *          3. 渲染省份选择器
+     * @output 省份列表的HTML结构
+     */
+    function fetchProvinces() {
+      axios({
+        url: 'http://hmajax.itheima.net/api/province'
+      }).then(({data: {list}}) => {
+        console.log('获取到的省份数据:', list);
+        renderProvinceOptions(list);
+      }).catch(error => {
+        console.error('获取省份数据失败:', error);
+        showResult('获取省份数据失败，请刷新页面重试', 'error');
+      });
+    }
+
+    /**
+     * 获取城市数据
+     *
+     * @input {string} name - 省份名称
+     * @process 1. 发送AJAX请求获取城市数据
+     *          2. 处理响应数据
+     *          3. 更新城市展示
+     * @output 城市列表数据
+     */
+    function fetchCitys(name) {
+      // 更新省份状态为加载中
+      updateProvinceLoadingState(name, true);
+      
+      axios({
+        url: 'http://hmajax.itheima.net/api/city',
+        params: {
+          pname: name
+        }
+      }).then(({data: {list}}) => {
+        console.log(`获取到的${name}城市数据:`, list);
+        
+        // 存储城市数据
+        citiesData[name] = {
+          cities: list,
+          status: 'success',
+          timestamp: Date.now()
+        };
+        
+        // 更新省份状态为成功
+        updateProvinceLoadingState(name, false);
+        
+        // 渲染城市数据
+        renderCities();
+        
+        return list;
+      }).catch(error => {
+        console.error(`获取${name}城市数据失败:`, error);
+        
+        // 存储错误状态
+        citiesData[name] = {
+          cities: [],
+          status: 'error',
+          error: error.message,
+          timestamp: Date.now()
+        };
+        
+        // 更新省份状态为错误
+        updateProvinceLoadingState(name, false, true);
+        
+        // 重新渲染城市数据
+        renderCities();
+        
+        showResult(`获取${name}城市数据失败`, 'error');
+      });
+    }
+    
+    /**
+     * 更新省份加载状态
+     *
+     * @input {string} provinceName - 省份名称
+     * @input {boolean} isLoading - 是否正在加载
+     * @input {boolean} isError - 是否为错误状态
+     * @process 1. 查找对应的省份元素
+     *          2. 更新加载状态显示
+     * @output 更新后的省份状态显示
+     */
+    function updateProvinceLoadingState(provinceName, isLoading, isError = false) {
+      const provinceElement = document.querySelector(`[data-value="${provinceName}"]`);
+      if (!provinceElement) return;
+      
+      const label = provinceElement.querySelector('label');
+      
+      if (isLoading) {
+        // 添加加载状态
+        label.innerHTML = `${provinceName} <span class="loading"></span>`;
+      } else if (isError) {
+        // 添加错误状态
+        label.innerHTML = `${provinceName} <span class="error-state">(加载失败)</span>`;
+      } else {
+        // 恢复正常状态
+        label.textContent = provinceName;
+      }
+    }
+    
+    /**
+     * 渲染省份选项
+     *
+     * @input {Array} provinces - 省份列表数组
+     * @process 1. 遍历省份数组生成HTML
+     *          2. 为每个选项设置唯一的id
+     *          3. 插入到DOM中
+     * @output 省份选择器的HTML结构
+     */
+    function renderProvinceOptions(provinces) {
+      const provinceGroup = document.getElementById('provinceGroup');
+      
+      // 生成省份选项HTML
+      const optionsHTML = provinces.map((province, index) => {
+        return `
+          <div class="checkbox-item" data-index="${index}" data-value="${province}">
+            <input
+              type="checkbox"
+              id="province_${index}"
+              value="${province}"
+              data-index="${index}"
+            >
+            <label for="province_${index}">${province}</label>
+          </div>
+        `;
+      }).join('');
+      
+      // 插入到DOM
+      provinceGroup.innerHTML = optionsHTML;
+      
+      // 绑定选择事件
+      bindSelectionEvents();
+    }
+    
+    /**
+     * 绑定选择事件
+     *
+     * @input 多选按钮组
+     * @process 1. 监听checkbox-item的点击事件
+     *          2. 更新选中状态
+     *          3. 启用/禁用查询按钮
+     * @output 更新后的UI状态
+     */
+    function bindSelectionEvents() {
+      const checkboxItems = document.querySelectorAll('.checkbox-item');
+      const queryBtn = document.getElementById('queryBtn');
+      
+      checkboxItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          // 获取checkbox元素
+          const checkbox = item.querySelector('input[type="checkbox"]');
+          const index = item.dataset.index;
+          const value = item.dataset.value;
+          
+          // 切换选中状态
+          checkbox.checked = !checkbox.checked;
+          
+          if (checkbox.checked) {
+            // 添加到选中列表
+            selectedProvinces.push({
+              name: value,
+              index: index
+            });
+            
+            // 添加选中样式
+            item.classList.add('selected');
+          } else {
+            // 从选中列表中移除
+            selectedProvinces = selectedProvinces.filter(province => province.index !== index);
+            
+            // 移除选中样式
+            item.classList.remove('selected');
+            
+            // 恢复省份标签的正常显示
+            const label = item.querySelector('label');
+            label.textContent = value;
+          }
+          
+          console.log('当前选中的省份:', selectedProvinces);
+          
+          // 更新选中数量显示
+          updateSelectedCount();
+          
+          // 根据选中数量启用/禁用查询按钮
+          queryBtn.disabled = selectedProvinces.length === 0;
+          
+          // 清除之前的结果
+          hideResult();
+          
+          // 隐藏城市展示区域
+          hideCitiesContainer();
+        });
+      });
+    }
+    
+    /**
+     * 更新选中数量显示
+     *
+     * @input 选中的省份数组
+     * @process 1. 计算选中数量
+     *          2. 更新显示文本
+     * @output 更新后的数量显示
+     */
+    function updateSelectedCount() {
+      const countElement = document.getElementById('selectedCount');
+      const count = selectedProvinces.length;
+      countElement.textContent = `已选择：${count} 个省份`;
+    }
+    
+    /**
+     * 处理查询按钮点击
+     *
+     * @input 查询按钮点击事件
+     * @process 1. 验证是否有选中项
+     *          2. 显示查询结果
+     *          3. 获取城市数据
+     * @output 查询结果信息和城市列表
+     */
+    function handleQuery() {
+      if (selectedProvinces.length === 0) {
+        showResult('请先选择至少一个省份', 'error');
+        return;
+      }
+      
+      // 构建结果文本
+      const provinceNames = selectedProvinces.map(p => p.name).join('、');
+      const resultText = `您选择的省份是：${provinceNames}（共${selectedProvinces.length}个）`;
+      showResult(resultText, 'success');
+      
+      // 这里可以添加实际的查询逻辑
+      console.log('执行查询，选中的省份:', selectedProvinces);
+      
+      // 清空之前的城市数据
+      citiesData = {};
+      
+      // 为每个选中的省份获取城市数据
+      selectedProvinces.forEach(province => {
+        fetchCitys(province.name);
+      });
+    }
+    
+    /**
+     * 渲染城市数据
+     *
+     * @input 城市数据对象
+     * @process 1. 遍历选中的省份
+     *          2. 生成城市展示HTML
+     *          3. 插入到DOM中
+     * @output 城市列表的HTML结构
+     */
+    function renderCities() {
+      const citiesContent = document.getElementById('citiesContent');
+      
+      if (selectedProvinces.length === 0) {
+        hideCitiesContainer();
+        return;
+      }
+      
+      // 生成城市展示HTML
+      const citiesHTML = selectedProvinces.map(province => {
+        const provinceData = citiesData[province.name];
+        
+        if (!provinceData) {
+          // 数据还未加载完成
+          return `
+            <div class="province-cities">
+              <div class="province-name">
+                ${province.name}
+                <span class="loading"></span>
+              </div>
+              <div class="cities-list">
+                <div class="city-item">正在加载城市数据...</div>
+              </div>
+            </div>
+          `;
+        }
+        
+        if (provinceData.status === 'error') {
+          // 加载失败
+          return `
+            <div class="province-cities">
+              <div class="province-name">
+                ${province.name}
+                <span class="city-count">加载失败</span>
+              </div>
+              <div class="cities-list">
+                <div class="city-item error-state">获取城市数据失败: ${provinceData.error}</div>
+              </div>
+            </div>
+          `;
+        }
+        
+        // 加载成功
+        const cities = provinceData.cities;
+        const citiesListHTML = cities.length > 0 
+          ? cities.map(city => `<div class="city-item">${city}</div>`).join('')
+          : '<div class="city-item">暂无城市数据</div>';
+        
+        return `
+          <div class="province-cities">
+            <div class="province-name">
+              ${province.name}
+              <span class="city-count">${cities.length}个城市</span>
+            </div>
+            <div class="cities-list">
+              ${citiesListHTML}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // 插入到DOM
+      citiesContent.innerHTML = citiesHTML;
+      
+      // 显示城市容器
+      showCitiesContainer();
+    }
+    
+    /**
+     * 显示城市容器
+     *
+     * @input 城市容器元素
+     * @process 添加显示类名
+     * @output 可见的城市展示区域
+     */
+    function showCitiesContainer() {
+      const container = document.getElementById('citiesContainer');
+      container.classList.add('show');
+    }
+    
+    /**
+     * 隐藏城市容器
+     *
+     * @input 城市容器元素
+     * @process 移除显示类名
+     * @output 隐藏的城市展示区域
+     */
+    function hideCitiesContainer() {
+      const container = document.getElementById('citiesContainer');
+      container.classList.remove('show');
+    }
+    
+    /**
+     * 显示结果信息
+     *
+     * @input {string} message - 要显示的消息
+     * @input {string} type - 消息类型（success/error）
+     * @process 1. 获取结果容器
+     *          2. 设置消息内容和样式
+     *          3. 显示结果区域
+     * @output 可见的结果信息
+     */
+    function showResult(message, type = 'success') {
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = message;
+      resultDiv.className = `result show ${type}`;
+    }
+    
+    /**
+     * 隐藏结果信息
+     *
+     * @input 结果容器
+     * @process 移除显示类名
+     * @output 隐藏的结果区域
+     */
+    function hideResult() {
+      const resultDiv = document.getElementById('result');
+      resultDiv.className = 'result';
+    }
+    
+    // 绑定查询按钮事件
+    document.getElementById('queryBtn').addEventListener('click', handleQuery);
+    
+    // 初始化应用
+    initApp();
+  </script>
+</body>
+</html>

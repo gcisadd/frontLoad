@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /**
+     * 基础reset，去除默认边距
+     */
+    body {
+      margin: 0;
+      font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+    }
+    /**
+     * 页面主区域样式
+     * 负责整体居中、背景色、全高等
+     */
+    .main {
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    /**
+     * 新闻卡片容器样式
+     * 居中显示，圆角阴影，宽度适中
+     */
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      margin: 50px auto;
+      padding: 32px 28px 24px 28px;
+      max-width: 420px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    /**
+     * 新闻标题样式
+     * 字体加粗，字号较大，底部留白
+     */
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #222;
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+    /**
+     * 新闻图片样式
+     * 圆角，宽度自适应，底部留白
+     */
+    .img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      display: block;
+      object-fit: cover;
+    }
+    /**
+     * 新闻文本信息区域
+     * 来源和时间横向排列，字体颜色柔和
+     */
+    .text {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: #888;
+      margin-top: 8px;
+    }
+    /**
+     * 来源样式
+     */
+    .source {
+      font-weight: 500;
+      color: #4a90e2;
+    }
+    /**
+     * 时间样式
+     */
+    .time {
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    
+  </div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    axios({
+      url: 'http://hmajax.itheima.net/api/news'
+    }).then((result) => {
+      const data = result.data.data
+      console.log(data)
+      const arr = data.map(item => {
+        const { title, img, source, time } = item
+        console.log(title, img, source, time)
+        return `
+          <div class="container">
+            <div class="title">${title}</div>
+            <img class="img" src="${img}" alt="">
+            <div class="text">
+              <div class="source">${source}</div>
+              <div class="time">${time}</div>
+            </div>
+          </div>
+        `
+      })
+      document.querySelector('.main').innerHTML = arr.join('')
+    })
+  </script>
+</body>
+</html>

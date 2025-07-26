@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录注册</title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    /* 页面整体样式 */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #e9ecef;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #message {
+      margin: 10px 0;
+      color: #dc3545; /* 错误信息颜色 */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>欢迎 - 登录</h2>
+    <div id="message"></div>
+    <input type="text" id="username" placeholder="账号名" required>
+    <input type="password" id="password" placeholder="密码" required>
+    <button onclick="login()">登录</button>
+    <button onclick="register()">注册</button>
+  </div>
+
+  <script>
+    // 校验输入
+    function validateInput(username, password) {
+      if (username.length < 8) {
+        return '用户名至少8位';
+      }
+      if (password.length < 6) {
+        return '密码至少6位';
+      }
+      return null; // 校验通过
+    }
+
+    // 登录功能
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const validationError = validateInput(username, password);
+      if (validationError) {
+        document.getElementById('message').innerText = validationError;
+        return;
+      }
+
+      axios.post('http://hmajax.itheima.net/api/login', {
+        username: username,
+        password: password
+      })
+      .then(response => {
+        document.getElementById('message').innerText = '登录成功';
+        document.getElementById('message').style.color = '#28a745'; // 成功信息颜色
+      })
+      .catch(error => {
+        document.getElementById('message').innerText = '登录失败: ' + error.response.data.message;
+      });
+    }
+
+    // 注册功能
+    function register() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const validationError = validateInput(username, password);
+      if (validationError) {
+        document.getElementById('message').innerText = validationError;
+        return;
+      }
+
+      axios.post('http://hmajax.itheima.net/api/register', {
+        username: username,
+        password: password
+      })
+      .then(response => {
+        document.getElementById('message').innerText = '注册成功';
+        document.getElementById('message').style.color = '#28a745'; // 成功信息颜色
+      })
+      .catch(error => {
+        document.getElementById('message').innerText = '注册失败: ' + error.response.data.message;
+      });
+    }
+  </script>
+</body>
+</html>

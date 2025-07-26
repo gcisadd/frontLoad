@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据提交 - 注册/登录账号</title>
+  <style>
+    /* CSS变量定义 - 便于主题定制 */
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --warning-color: #f59e0b;
+      --info-color: #3b82f6;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9fafb;
+      --border-color: #e5e7eb;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      --border-radius: 12px;
+      --border-radius-lg: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 全局样式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--primary-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* 背景装饰元素 */
+    body::before,
+    body::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: -1;
+    }
+
+    body::before {
+      top: -150px;
+      right: -150px;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    body::after {
+      bottom: -150px;
+      left: -150px;
+      animation: float 6s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    /* 主容器 */
+    .container {
+      width: 100%;
+      max-width: 550px;
+      margin: 20px;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      position: relative;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* 容器装饰 */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--secondary-gradient);
+    }
+    
+    /* 标题区域 */
+    .header {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .main-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.95;
+      position: relative;
+      z-index: 1;
+      font-weight: 500;
+    }
+    
+    /* API说明区域 */
+    .api-docs {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 30px;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .api-docs::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--secondary-gradient);
+    }
+    
+    .api-docs h3 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+    }
+    
+    .api-docs h3::before {
+      content: "🚀";
+      margin-right: 12px;
+      font-size: 24px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+    
+    .requirement {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      border-left: 5px solid var(--info-color);
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .requirement::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+      transform: translateX(-100%);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .api-info {
+      background: var(--bg-primary);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .api-info:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .api-url {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      color: var(--error-color);
+      margin: 15px 0;
+      word-break: break-all;
+      border: 1px solid #fecaca;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .api-url::before {
+      content: '🔗';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.5;
+    }
+    
+    .method-badge {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-left: 15px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .method-badge::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .method-badge:hover::before {
+      left: 100%;
+    }
+    
+    .parameter-list {
+      margin-top: 20px;
+    }
+    
+    .parameter-item {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 18px;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--border-color);
+      margin-bottom: 15px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .parameter-item:hover {
+      transform: translateX(5px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--info-color);
+    }
+
+    .parameter-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--secondary-gradient);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+
+    .parameter-item:hover::before {
+      transform: scaleY(1);
+    }
+    
+    .parameter-name {
+      font-weight: 700;
+      color: var(--error-color);
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+    }
+
+    .parameter-name::before {
+      content: '⚡';
+      margin-right: 8px;
+      font-size: 14px;
+    }
+    
+    .parameter-desc {
+      color: var(--text-secondary);
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      padding-left: 22px;
+    }
+    
+    /* 注册表单区域 */
+    .register-form {
+      padding: 40px 30px;
+      background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+    }
+
+    /* 登录表单区域 */
+    .login-form {
+      padding: 40px 30px;
+      background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+    }
+    
+    .form-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 30px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .form-title::before {
+      content: "🎯";
+      margin-right: 12px;
+      font-size: 28px;
+      animation: pulse 2s infinite;
+    }
+
+    /* 登录表单标题特殊样式 */
+    .login-form .form-title::before {
+      content: "🔐";
+      margin-right: 12px;
+      font-size: 28px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 15px;
+      position: relative;
+    }
+
+    .form-label::after {
+      content: ' *';
+      color: var(--error-color);
+      font-weight: 700;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 18px 20px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+      background: var(--bg-primary);
+      position: relative;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--info-color);
+      background-color: var(--bg-primary);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+    
+    .form-input.error {
+      border-color: var(--error-color);
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
+    .form-input.success {
+      border-color: var(--success-color);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+    
+    .validation-message {
+      margin-top: 8px;
+      font-size: 13px;
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .validation-message::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 2px;
+    }
+    
+    .validation-message.error {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      color: var(--error-color);
+      border: 1px solid #fecaca;
+    }
+
+    .validation-message.error::before {
+      background: var(--error-color);
+    }
+    
+    .validation-message.success {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      color: var(--success-color);
+      border: 1px solid #bbf7d0;
+    }
+
+    .validation-message.success::before {
+      background: var(--success-color);
+    }
+    
+    .validation-message.info {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      color: var(--info-color);
+      border: 1px solid #bfdbfe;
+    }
+
+    .validation-message.info::before {
+      background: var(--info-color);
+    }
+    
+    .register-btn {
+      width: 100%;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 18px 24px;
+      border-radius: var(--border-radius);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 15px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .register-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .register-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .register-btn:hover::before {
+      left: 100%;
+    }
+
+    .register-btn:active {
+      transform: translateY(-1px);
+    }
+    
+    .register-btn:disabled {
+      background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .register-btn:disabled::before {
+      display: none;
+    }
+    
+    /* 结果显示区域 */
+    .result-section {
+      padding: 25px 30px;
+      display: none;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+    
+    .result-section.show {
+      display: block;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .result-message {
+      padding: 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .result-message::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    
+    .result-message.success {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      color: var(--success-color);
+      border: 1px solid #bbf7d0;
+    }
+
+    .result-message.success::before {
+      background: var(--success-color);
+    }
+    
+    .result-message.error {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      color: var(--error-color);
+      border: 1px solid #fecaca;
+    }
+
+    .result-message.error::before {
+      background: var(--error-color);
+    }
+    
+    .result-message.info {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      color: var(--info-color);
+      border: 1px solid #bfdbfe;
+    }
+
+    .result-message.info::before {
+      background: var(--info-color);
+    }
+    
+    /* 加载状态 */
+    .loading {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        border-radius: var(--border-radius);
+        max-width: 100%;
+      }
+      
+      .header {
+        padding: 25px 20px;
+      }
+      
+      .main-title {
+        font-size: 26px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+      
+      .api-docs {
+        padding: 20px;
+      }
+
+      .api-docs h3 {
+        font-size: 18px;
+      }
+      
+      .register-form {
+        padding: 25px 20px;
+      }
+
+      .login-form {
+        padding: 25px 20px;
+      }
+
+      .form-title {
+        font-size: 20px;
+      }
+
+      .form-input {
+        padding: 16px 18px;
+        font-size: 16px;
+      }
+
+      .register-btn {
+        padding: 16px 20px;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 5px;
+        border-radius: 8px;
+      }
+
+      .header {
+        padding: 20px 15px;
+      }
+
+      .main-title {
+        font-size: 22px;
+      }
+
+      .api-docs {
+        padding: 15px;
+      }
+
+      .register-form {
+        padding: 20px 15px;
+      }
+
+      .login-form {
+        padding: 20px 15px;
+      }
+
+      .form-input {
+        padding: 14px 16px;
+      }
+    }
+
+    /* 标签切换样式 */
+    .tab-switch {
+      display: flex;
+      justify-content: center;
+      margin: 0;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 2px solid var(--border-color);
+      position: relative;
+    }
+
+    .tab-switch::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--secondary-gradient);
+      opacity: 0.3;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding: 20px 40px;
+      cursor: pointer;
+      transition: var(--transition);
+      border-bottom: 3px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--primary-gradient);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn:hover::before {
+      opacity: 0.05;
+    }
+
+    .tab-btn.active {
+      color: var(--info-color);
+      border-bottom: 3px solid var(--info-color);
+      background: rgba(59, 130, 246, 0.05);
+      font-weight: 700;
+    }
+
+    .tab-btn.active::before {
+      opacity: 0.1;
+    }
+
+    /* 表单显示控制 */
+    .login-form { 
+      display: none; 
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    .login-form.active { 
+      display: block; 
+    }
+    
+    .register-form { 
+      display: none; 
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    .register-form.active { 
+      display: block; 
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-gradient);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--secondary-gradient);
+    }
+
+    /* 选择文本样式 */
+    ::selection {
+      background: var(--info-color);
+      color: white;
+    }
+
+    /* 焦点样式 */
+    *:focus {
+      outline: 2px solid var(--info-color);
+      outline-offset: 2px;
+    }
+
+    /* 打印样式 */
+    @media print {
+      body {
+        background: white;
+      }
+      
+      .container {
+        box-shadow: none;
+        border: 1px solid #ccc;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 标题区域 -->
+    <div class="header">
+      <h1 class="main-title">数据提交 - 注册/登录账号</h1>
+      <p class="subtitle">用户注册与登录系统</p>
+    </div>
+    
+    <!-- API说明区域 -->
+    <div class="api-docs">
+      <h3>需求</h3>
+      <div class="requirement">
+        通过 axios 提交用户名和密码，完成注册和登录功能
+      </div>
+      <h3>API接口信息</h3>
+      <div class="api-info">
+        <div><strong>注册用户 URL 地址:</strong></div>
+        <div class="api-url">http://hmajax.itheima.net/api/register</div>
+        <div><strong>登录用户 URL 地址:</strong></div>
+        <div class="api-url">http://hmajax.itheima.net/api/login</div>
+        <div><strong>请求方法:</strong> <span class="method-badge">POST</span></div>
+        <div class="parameter-list">
+          <div><strong>参数名:</strong></div>
+          <div class="parameter-item">
+            <div class="parameter-name">username</div>
+            <div class="parameter-desc">用户名(中英文和数字组成,最少8位)</div>
+          </div>
+          <div class="parameter-item">
+            <div class="parameter-name">password</div>
+            <div class="parameter-desc">密码(最少6位)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 切换标签 -->
+    <div class="tab-switch">
+      <button class="tab-btn active" id="registerTab">注册</button>
+      <button class="tab-btn" id="loginTab">登录</button>
+    </div>
+    
+    <!-- 注册表单区域 -->
+    <div class="register-form active" id="registerFormWrap">
+      <h3 class="form-title">用户注册</h3>
+      <form id="registerForm">
+        <div class="form-group">
+          <label class="form-label" for="username">用户名</label>
+          <input type="text" class="form-input" id="username" name="username" placeholder="请输入用户名（最少8位，中英文和数字组成）" autocomplete="username">
+          <div class="validation-message" id="usernameValidation"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">密码</label>
+          <input type="password" class="form-input" id="password" name="password" placeholder="请输入密码（最少6位）" autocomplete="new-password">
+          <div class="validation-message" id="passwordValidation"></div>
+        </div>
+        <button type="submit" class="register-btn" id="registerBtn">立即注册</button>
+      </form>
+    </div>
+    
+    <!-- 登录表单区域 -->
+    <div class="login-form" id="loginFormWrap">
+      <h3 class="form-title">用户登录</h3>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="loginUsername">用户名</label>
+          <input type="text" class="form-input" id="loginUsername" name="username" placeholder="请输入用户名（最少8位，中英文和数字组成）" autocomplete="username">
+          <div class="validation-message" id="loginUsernameValidation"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">密码</label>
+          <input type="password" class="form-input" id="loginPassword" name="password" placeholder="请输入密码（最少6位）" autocomplete="current-password">
+          <div class="validation-message" id="loginPasswordValidation"></div>
+        </div>
+        <button type="submit" class="register-btn" id="loginBtn">立即登录</button>
+      </form>
+    </div>
+    
+    <!-- 结果显示区域 -->
+    <div class="result-section" id="resultSection">
+      <div class="result-message" id="resultMessage"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    /**
+     * 用户注册组件
+     *
+     * @input 用户输入的用户名和密码
+     * @process 1. 验证用户输入的有效性
+     *          2. 发送POST请求到注册API
+     *          3. 处理响应结果
+     * @output 注册成功或失败的消息
+     */
+    
+    // 获取DOM元素
+    const registerForm = document.getElementById('registerForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const registerBtn = document.getElementById('registerBtn');
+    const resultSection = document.getElementById('resultSection');
+    const resultMessage = document.getElementById('resultMessage');
+    const usernameValidation = document.getElementById('usernameValidation');
+    const passwordValidation = document.getElementById('passwordValidation');
+    
+    /**
+     * 初始化应用
+     *
+     * @input 页面加载完成
+     * @process 1. 绑定表单提交事件
+     *          2. 绑定输入验证事件
+     * @output 完整的交互界面
+     */
+    function initApp() {
+      // 绑定表单提交事件
+      registerForm.addEventListener('submit', handleRegister);
+      
+      // 绑定输入验证事件
+      usernameInput.addEventListener('input', () => validateField('username'));
+      usernameInput.addEventListener('blur', () => validateField('username'));
+      passwordInput.addEventListener('input', () => validateField('password'));
+      passwordInput.addEventListener('blur', () => validateField('password'));
+      
+      // 绑定回车键事件
+      usernameInput.addEventListener('keypress', handleEnterKey);
+      passwordInput.addEventListener('keypress', handleEnterKey);
+    }
+    
+    /**
+     * 处理回车键事件
+     *
+     * @input 键盘事件
+     * @process 1. 检查是否为回车键
+     *          2. 触发相应操作
+     * @output 焦点切换或表单提交
+     */
+    function handleEnterKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.target === usernameInput) {
+          passwordInput.focus();
+        } else if (e.target === passwordInput) {
+          handleRegister(e);
+        }
+      }
+    }
+    
+    /**
+     * 验证单个字段
+     *
+     * @input {string} fieldName - 字段名称
+     * @process 1. 获取字段值
+     *          2. 应用验证规则
+     *          3. 更新UI状态
+     * @output 验证结果和UI更新
+     */
+    function validateField(fieldName) {
+      const input = document.getElementById(fieldName);
+      const validation = document.getElementById(fieldName + 'Validation');
+      const value = input.value.trim();
+      const rules = validationRules[fieldName];
+      
+      // 清除之前的样式
+      input.classList.remove('error', 'success');
+      validation.className = 'validation-message';
+      
+      // 检查是否为空
+      if (!value) {
+        showValidationMessage(fieldName, 'required', 'error');
+        return false;
+      }
+      
+      // 检查最小长度
+      if (value.length < rules.minLength) {
+        showValidationMessage(fieldName, 'minLength', 'error');
+        return false;
+      }
+      
+      // 检查用户名格式
+      if (fieldName === 'username' && !rules.pattern.test(value)) {
+        showValidationMessage(fieldName, 'pattern', 'error');
+        return false;
+      }
+      
+      // 验证通过
+      showValidationMessage(fieldName, 'success', 'success');
+      return true;
+    }
+    
+    /**
+     * 显示验证消息
+     *
+     * @input {string} fieldName - 字段名称
+     * @input {string} messageType - 消息类型
+     * @input {string} status - 状态类型
+     * @process 1. 获取对应的消息
+     *          2. 更新UI显示
+     * @output 验证消息的UI更新
+     */
+    function showValidationMessage(fieldName, messageType, status) {
+      const input = document.getElementById(fieldName);
+      const validation = document.getElementById(fieldName + 'Validation');
+      const message = validationRules[fieldName].message[messageType];
+      
+      input.classList.add(status);
+      validation.className = `validation-message ${status}`;
+      validation.textContent = message;
+    }
+    
+    /**
+     * 验证所有字段
+     *
+     * @input 表单数据
+     * @process 1. 验证用户名
+     *          2. 验证密码
+     * @output 整体验证结果
+     */
+    function validateForm() {
+      const usernameValid = validateField('username');
+      const passwordValid = validateField('password');
+      return usernameValid && passwordValid;
+    }
+    
+    /**
+     * 处理注册表单提交
+     *
+     * @input 表单提交事件
+     * @process 1. 阻止默认提交行为
+     *          2. 验证表单数据
+     *          3. 发送注册请求
+     * @output 注册结果
+     */
+    function handleRegister(e) {
+      e.preventDefault();
+      
+      // 验证表单
+      if (!validateForm()) {
+        showResult('请检查输入信息', 'error');
+        return;
+      }
+      
+      // 获取表单数据
+      const formData = {
+        username: usernameInput.value.trim(),
+        password: passwordInput.value.trim()
+      };
+      
+      // 显示加载状态
+      showLoading();
+      
+      // 发送注册请求
+      submitRegistration(formData);
+    }
+    
+    /**
+     * 提交注册请求
+     *
+     * @input {Object} formData - 表单数据
+     * @process 1. 发送POST请求到注册API
+     *          2. 处理响应结果
+     *          3. 显示结果消息
+     * @output 注册成功或失败的结果
+     */
+    function submitRegistration(formData) {
+      axios({
+        method: 'POST',
+        url: 'http://hmajax.itheima.net/api/register',
+        data: formData,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(({data}) => {
+        console.log('注册响应:', data);
+        
+        if (data.code === 200 || data.code === 10000) {
+          // 注册成功
+          showResult(`注册成功！欢迎 ${formData.username}`, 'success');
+          resetForm();
+        } else {
+          // 注册失败
+          showResult(data.message || '注册失败，请重试', 'error');
+        }
+      }).catch(error => {
+        console.error('注册请求失败:', error);
+        
+        let errorMessage = '注册失败，请重试';
+        if (error.response) {
+          // 服务器返回错误状态码
+          if (error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+          } else {
+            errorMessage = `服务器错误 (${error.response.status})`;
+          }
+        } else if (error.request) {
+          // 网络错误
+          errorMessage = '网络连接失败，请检查网络设置';
+        }
+        
+        showResult(errorMessage, 'error');
+      });
+    }
+    
+    /**
+     * 显示加载状态
+     *
+     * @input 无
+     * @process 1. 更新按钮文本
+     *          2. 禁用按钮
+     *          3. 显示结果区域
+     * @output 加载状态显示
+     */
+    function showLoading() {
+      registerBtn.innerHTML = '<span class="loading"></span>注册中...';
+      registerBtn.disabled = true;
+      resultSection.classList.add('show');
+    }
+    
+    /**
+     * 显示结果消息
+     *
+     * @input {string} message - 消息内容
+     * @input {string} type - 消息类型
+     * @process 1. 更新结果消息
+     *          2. 恢复按钮状态
+     *          3. 显示结果区域
+     * @output 结果消息显示
+     */
+    function showResult(message, type) {
+      resultMessage.textContent = message;
+      resultMessage.className = `result-message ${type}`;
+      
+      // 恢复按钮状态
+      registerBtn.innerHTML = '立即注册';
+      registerBtn.disabled = false;
+      
+      resultSection.classList.add('show');
+      
+      // 如果是成功消息，3秒后隐藏
+      if (type === 'success') {
+        setTimeout(() => {
+          resultSection.classList.remove('show');
+        }, 3000);
+      }
+    }
+    
+    /**
+     * 重置表单
+     *
+     * @input 无
+     * @process 1. 清空输入框
+     *          2. 清除验证消息
+     *          3. 重置样式
+     * @output 重置后的表单状态
+     */
+    function resetForm() {
+      usernameInput.value = '';
+      passwordInput.value = '';
+      usernameInput.classList.remove('error', 'success');
+      passwordInput.classList.remove('error', 'success');
+      usernameValidation.className = 'validation-message';
+      passwordValidation.className = 'validation-message';
+      usernameValidation.textContent = '';
+      passwordValidation.textContent = '';
+    }
+    
+    // 注册/登录切换
+    const registerTab = document.getElementById('registerTab');
+    const loginTab = document.getElementById('loginTab');
+    const registerFormWrap = document.getElementById('registerFormWrap');
+    const loginFormWrap = document.getElementById('loginFormWrap');
+    registerTab.onclick = function() {
+      registerTab.classList.add('active');
+      loginTab.classList.remove('active');
+      registerFormWrap.classList.add('active');
+      loginFormWrap.classList.remove('active');
+      document.getElementById('resultSection').classList.remove('show');
+    };
+    loginTab.onclick = function() {
+      loginTab.classList.add('active');
+      registerTab.classList.remove('active');
+      loginFormWrap.classList.add('active');
+      registerFormWrap.classList.remove('active');
+      document.getElementById('resultSection').classList.remove('show');
+    };
+    
+    // 注册表单逻辑（复用原有）
+    // 验证规则
+    const validationRules = {
+      username: {
+        minLength: 8,
+        pattern: /^[a-zA-Z0-9\u4e00-\u9fa5]+$/,
+        message: {
+          required: '请输入用户名',
+          minLength: '用户名至少需要8位字符',
+          pattern: '用户名只能包含中英文和数字',
+          success: '用户名格式正确'
+        }
+      },
+      password: {
+        minLength: 6,
+        message: {
+          required: '请输入密码',
+          minLength: '密码至少需要6位字符',
+          success: '密码格式正确'
+        }
+      }
+    };
+    
+    /**
+     * 初始化应用
+     *
+     * @input 页面加载完成
+     * @process 1. 绑定表单提交事件
+     *          2. 绑定输入验证事件
+     * @output 完整的交互界面
+     */
+    function initApp() {
+      // 绑定表单提交事件
+      registerForm.addEventListener('submit', handleRegister);
+      
+      // 绑定输入验证事件
+      usernameInput.addEventListener('input', () => validateField('username'));
+      usernameInput.addEventListener('blur', () => validateField('username'));
+      passwordInput.addEventListener('input', () => validateField('password'));
+      passwordInput.addEventListener('blur', () => validateField('password'));
+      
+      // 绑定回车键事件
+      usernameInput.addEventListener('keypress', handleEnterKey);
+      passwordInput.addEventListener('keypress', handleEnterKey);
+    }
+    
+    /**
+     * 处理回车键事件
+     *
+     * @input 键盘事件
+     * @process 1. 检查是否为回车键
+     *          2. 触发相应操作
+     * @output 焦点切换或表单提交
+     */
+    function handleEnterKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.target === usernameInput) {
+          passwordInput.focus();
+        } else if (e.target === passwordInput) {
+          handleRegister(e);
+        }
+      }
+    }
+    
+    /**
+     * 验证单个字段
+     *
+     * @input {string} fieldName - 字段名称
+     * @process 1. 获取字段值
+     *          2. 应用验证规则
+     *          3. 更新UI状态
+     * @output 验证结果和UI更新
+     */
+    function validateField(fieldName) {
+      const input = document.getElementById(fieldName);
+      const validation = document.getElementById(fieldName + 'Validation');
+      const value = input.value.trim();
+      const rules = validationRules[fieldName];
+      
+      // 清除之前的样式
+      input.classList.remove('error', 'success');
+      validation.className = 'validation-message';
+      
+      // 检查是否为空
+      if (!value) {
+        showValidationMessage(fieldName, 'required', 'error');
+        return false;
+      }
+      
+      // 检查最小长度
+      if (value.length < rules.minLength) {
+        showValidationMessage(fieldName, 'minLength', 'error');
+        return false;
+      }
+      
+      // 检查用户名格式
+      if (fieldName === 'username' && !rules.pattern.test(value)) {
+        showValidationMessage(fieldName, 'pattern', 'error');
+        return false;
+      }
+      
+      // 验证通过
+      showValidationMessage(fieldName, 'success', 'success');
+      return true;
+    }
+    
+    /**
+     * 显示验证消息
+     *
+     * @input {string} fieldName - 字段名称
+     * @input {string} messageType - 消息类型
+     * @input {string} status - 状态类型
+     * @process 1. 获取对应的消息
+     *          2. 更新UI显示
+     * @output 验证消息的UI更新
+     */
+    function showValidationMessage(fieldName, messageType, status) {
+      const input = document.getElementById(fieldName);
+      const validation = document.getElementById(fieldName + 'Validation');
+      const message = validationRules[fieldName].message[messageType];
+      
+      input.classList.add(status);
+      validation.className = `validation-message ${status}`;
+      validation.textContent = message;
+    }
+    
+    /**
+     * 验证所有字段
+     *
+     * @input 表单数据
+     * @process 1. 验证用户名
+     *          2. 验证密码
+     * @output 整体验证结果
+     */
+    function validateForm() {
+      const usernameValid = validateField('username');
+      const passwordValid = validateField('password');
+      return usernameValid && passwordValid;
+    }
+    
+    /**
+     * 处理注册表单提交
+     *
+     * @input 表单提交事件
+     * @process 1. 阻止默认提交行为
+     *          2. 验证表单数据
+     *          3. 发送注册请求
+     * @output 注册结果
+     */
+    function handleRegister(e) {
+      e.preventDefault();
+      
+      // 验证表单
+      if (!validateForm()) {
+        showResult('请检查输入信息', 'error');
+        return;
+      }
+      
+      // 获取表单数据
+      const formData = {
+        username: usernameInput.value.trim(),
+        password: passwordInput.value.trim()
+      };
+      
+      // 显示加载状态
+      showLoading();
+      
+      // 发送注册请求
+      submitRegistration(formData);
+    }
+    
+    /**
+     * 提交注册请求
+     *
+     * @input {Object} formData - 表单数据
+     * @process 1. 发送POST请求到注册API
+     *          2. 处理响应结果
+     *          3. 显示结果消息
+     * @output 注册成功或失败的结果
+     */
+    function submitRegistration(formData) {
+      axios({
+        method: 'POST',
+        url: 'http://hmajax.itheima.net/api/register',
+        data: formData,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(({data}) => {
+        console.log('注册响应:', data);
+        
+        if (data.code === 200 || data.code === 10000) {
+          // 注册成功
+          showResult(`注册成功！欢迎 ${formData.username}`, 'success');
+          resetForm();
+        } else {
+          // 注册失败
+          showResult(data.message || '注册失败，请重试', 'error');
+        }
+      }).catch(error => {
+        console.error('注册请求失败:', error);
+        
+        let errorMessage = '注册失败，请重试';
+        if (error.response) {
+          // 服务器返回错误状态码
+          if (error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+          } else {
+            errorMessage = `服务器错误 (${error.response.status})`;
+          }
+        } else if (error.request) {
+          // 网络错误
+          errorMessage = '网络连接失败，请检查网络设置';
+        }
+        
+        showResult(errorMessage, 'error');
+      });
+    }
+    
+    /**
+     * 显示加载状态
+     *
+     * @input 无
+     * @process 1. 更新按钮文本
+     *          2. 禁用按钮
+     *          3. 显示结果区域
+     * @output 加载状态显示
+     */
+    function showLoading() {
+      registerBtn.innerHTML = '<span class="loading"></span>注册中...';
+      registerBtn.disabled = true;
+      resultSection.classList.add('show');
+    }
+    
+    /**
+     * 显示结果消息
+     *
+     * @input {string} message - 消息内容
+     * @input {string} type - 消息类型
+     * @process 1. 更新结果消息
+     *          2. 恢复按钮状态
+     *          3. 显示结果区域
+     * @output 结果消息显示
+     */
+    function showResult(message, type) {
+      resultMessage.textContent = message;
+      resultMessage.className = `result-message ${type}`;
+      
+      // 恢复按钮状态
+      registerBtn.innerHTML = '立即注册';
+      registerBtn.disabled = false;
+      
+      resultSection.classList.add('show');
+      
+      // 如果是成功消息，3秒后隐藏
+      if (type === 'success') {
+        setTimeout(() => {
+          resultSection.classList.remove('show');
+        }, 3000);
+      }
+    }
+    
+    /**
+     * 重置表单
+     *
+     * @input 无
+     * @process 1. 清空输入框
+     *          2. 清除验证消息
+     *          3. 重置样式
+     * @output 重置后的表单状态
+     */
+    function resetForm() {
+      usernameInput.value = '';
+      passwordInput.value = '';
+      usernameInput.classList.remove('error', 'success');
+      passwordInput.classList.remove('error', 'success');
+      usernameValidation.className = 'validation-message';
+      passwordValidation.className = 'validation-message';
+      usernameValidation.textContent = '';
+      passwordValidation.textContent = '';
+    }
+    
+    // 初始化应用
+    initApp();
+    
+    // 登录表单逻辑
+    const loginForm = document.getElementById('loginForm');
+    const loginUsernameInput = document.getElementById('loginUsername');
+    const loginPasswordInput = document.getElementById('loginPassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginUsernameValidation = document.getElementById('loginUsernameValidation');
+    const loginPasswordValidation = document.getElementById('loginPasswordValidation');
+    // 登录输入校验
+    function validateLoginField(fieldName) {
+      const input = fieldName === 'username' ? loginUsernameInput : loginPasswordInput;
+      const validation = fieldName === 'username' ? loginUsernameValidation : loginPasswordValidation;
+      const value = input.value.trim();
+      const rules = validationRules[fieldName];
+      input.classList.remove('error', 'success');
+      validation.className = 'validation-message';
+      if (!value) {
+        showLoginValidationMessage(fieldName, 'required', 'error');
+        return false;
+      }
+      if (value.length < rules.minLength) {
+        showLoginValidationMessage(fieldName, 'minLength', 'error');
+        return false;
+      }
+      if (fieldName === 'username' && !rules.pattern.test(value)) {
+        showLoginValidationMessage(fieldName, 'pattern', 'error');
+        return false;
+      }
+      showLoginValidationMessage(fieldName, 'success', 'success');
+      return true;
+    }
+    function showLoginValidationMessage(fieldName, messageType, status) {
+      const input = fieldName === 'username' ? loginUsernameInput : loginPasswordInput;
+      const validation = fieldName === 'username' ? loginUsernameValidation : loginPasswordValidation;
+      const message = validationRules[fieldName].message[messageType];
+      input.classList.add(status);
+      validation.className = `validation-message ${status}`;
+      validation.textContent = message;
+      
+      // 添加验证消息的动画效果
+      validation.style.animation = 'slideDown 0.3s ease-out';
+    }
+    function validateLoginForm() {
+      const usernameValid = validateLoginField('username');
+      const passwordValid = validateLoginField('password');
+      return usernameValid && passwordValid;
+    }
+    // 登录表单事件
+    loginUsernameInput.addEventListener('input', () => validateLoginField('username'));
+    loginUsernameInput.addEventListener('blur', () => validateLoginField('username'));
+    loginPasswordInput.addEventListener('input', () => validateLoginField('password'));
+    loginPasswordInput.addEventListener('blur', () => validateLoginField('password'));
+    loginUsernameInput.addEventListener('keypress', handleLoginEnterKey);
+    loginPasswordInput.addEventListener('keypress', handleLoginEnterKey);
+    function handleLoginEnterKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.target === loginUsernameInput) {
+          loginPasswordInput.focus();
+        } else if (e.target === loginPasswordInput) {
+          handleLogin(e);
+        }
+      }
+    }
+    loginForm.addEventListener('submit', handleLogin);
+    function handleLogin(e) {
+      e.preventDefault();
+      if (!validateLoginForm()) {
+        showResult('请检查输入信息', 'error');
+        return;
+      }
+      const formData = {
+        username: loginUsernameInput.value.trim(),
+        password: loginPasswordInput.value.trim()
+      };
+      showLoginLoading();
+      axios({
+        method: 'POST',
+        url: 'http://hmajax.itheima.net/api/login',
+        data: formData,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(({data}) => {
+        if (data.code === 200 || data.code === 10000) {
+          showResult(`登录成功！欢迎 ${formData.username}`, 'success');
+          // 登录成功后只恢复按钮状态，不清空表单
+          loginBtn.innerHTML = '立即登录';
+          loginBtn.disabled = false;
+        } else {
+          showResult(data.message || '登录失败，请重试', 'error');
+          // 恢复登录按钮状态
+          loginBtn.innerHTML = '立即登录';
+          loginBtn.disabled = false;
+        }
+      }).catch(error => {
+        let errorMessage = '登录失败，请重试';
+        if (error.response) {
+          if (error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+          } else {
+            errorMessage = `服务器错误 (${error.response.status})`;
+          }
+        } else if (error.request) {
+          errorMessage = '网络连接失败，请检查网络设置';
+        }
+        showResult(errorMessage, 'error');
+        // 恢复登录按钮状态
+        loginBtn.innerHTML = '立即登录';
+        loginBtn.disabled = false;
+      });
+    }
+    function showLoginLoading() {
+      loginBtn.innerHTML = '<span class="loading"></span>登录中...';
+      loginBtn.disabled = true;
+      document.getElementById('resultSection').classList.add('show');
+    }
+    function resetLoginForm() {
+      loginUsernameInput.value = '';
+      loginPasswordInput.value = '';
+      loginUsernameInput.classList.remove('error', 'success');
+      loginPasswordInput.classList.remove('error', 'success');
+      loginUsernameValidation.className = 'validation-message';
+      loginPasswordValidation.className = 'validation-message';
+      loginUsernameValidation.textContent = '';
+      loginPasswordValidation.textContent = '';
+      loginBtn.innerHTML = '立即登录';
+      loginBtn.disabled = false;
+    }
+  </script>
+</body>
+</html>
