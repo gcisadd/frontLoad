@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    const paramsObj = new URLSearchParams({
+      pname: '广东省',
+      cname: '深圳市'
+    })
+    console.log(paramsObj.toString())
+    const xhr = new XMLHttpRequest()
+    xhr.open('get', `https://hmajax.itheima.net/api/area?${paramsObj.toString()}`)
+    xhr.addEventListener('loadend', () => {
+      console.log(xhr.response)
+    })
+    xhr.send()
+
+    const user = {username: '2022155026', password: '123456'}
+    const xhrPost = new XMLHttpRequest()
+    // xhrPost.open('post', 'https://hmajax.itheima.net/api/register')
+    xhrPost.open('post', 'https://hmajax.itheima.net/api/login')
+    xhrPost.addEventListener('loadend', () => {
+      console.log(xhrPost.response)
+    })
+    xhrPost.setRequestHeader('content-type', 'application/json')
+    xhrPost.send(JSON.stringify(user))
+  </script>
+</body>
+</html>

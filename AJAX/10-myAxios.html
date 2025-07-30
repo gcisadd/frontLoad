@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .province {
+      color: blue;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="box"></div>
+  
+  <!-- 自定义模态框 -->
+  <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <div style="background:white; margin:100px auto; padding:20px; width:300px; text-align:center;">
+      <h2 id="modal-title">标题</h2>
+      <p id="modal-message">内容</p>
+      <button id="close-modal">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    function myAxios(config) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        if (config.params) {
+          const paransObj = new URLSearchParams(config.params)
+          const params = "?" + paransObj.toString()
+          console.log(config.url + params)
+          xhr.open(config.method || 'GET', config.url + params)
+        } else {
+          xhr.open(config.method || 'GET', config.url)
+        }
+        xhr.addEventListener('loadend', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.response))
+          } else {
+            reject(new Error(xhr.response))
+          }
+        })
+        if (config.data) {
+          xhr.setRequestHeader('Content-Type', 'application/json')
+          xhr.send(JSON.stringify(config.data))
+        } else {
+          xhr.send()
+        }
+      })
+    }
+    // myAxios({
+    //   url: 'https://hmajax.itheima.net/api/province',
+    // }).then(result => {
+    //   document.querySelector('.box').innerHTML = result.list.map((item, index) => {
+    //     return `<p class="province" data-id="${index}">${item}</p>`
+    //   }).join('')
+    // }).catch(error => {
+    //   document.querySelector('.box').innerHTML = error.message
+    // })
+    // const box = document.querySelector('.box')
+    // box.addEventListener('click', event => {
+    //   if (event.target.className === 'province') {
+    //     const paramsObj = new URLSearchParams({
+    //       pname: event.target.innerHTML
+    //     })
+    //     const queryString = paramsObj.toString()
+    //     myAxios({
+    //       url: `https://hmajax.itheima.net/api/city?${queryString}`,
+    //     }).then(result => {
+    //       // 设置模态框的标题和内容
+    //       document.getElementById('modal-title').innerText = '城市列表'
+    //       document.getElementById('modal-message').innerText = result.list.map(item => item).join('\n')
+    //       // 显示模态框
+    //       document.getElementById('modal').style.display = 'block'
+    //     }).catch(error => {
+
+    //     })
+    //   }
+    // })
+
+    // document.getElementById('close-modal').addEventListener('click', () => {
+    //   document.getElementById('modal').style.display = 'none'
+    // })
+    myAxios({
+      // url: "https://hmajax.itheima.net/api/area",
+      // url: "https://hmajax.itheima.net/api/register",
+      url: "https://hmajax.itheima.net/api/login",
+      // method: "GET",
+      method: "POST",
+      // params: {
+        // username: "2022155026",
+        // password: "123456",
+        // pname: "广东省",
+        // cname: "茂名市",
+      // },
+      data: {
+        username: "2022155026",
+        password: "123456",
+      },
+    }).then(result => {
+      alert(result.message)
+    }).catch(error => {
+      alert(JSON.parse(error.message).message)
+    })
+  </script>
+</body>
+</html>

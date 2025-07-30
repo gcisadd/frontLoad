@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    const p = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        console.log('p是', p)
+        // resolve('成功')
+        reject(new Error('失败'))
+        console.log('p是', p)
+      }, 1000)
+    })
+    p.then(result => {
+      console.log(result)
+    }).catch(err => {
+      console.error(err)
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <input type="file" class="img" required>
+  <div>
+    <img src="" alt="">
+  </div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  const img = document.querySelector('.img')
+  img.addEventListener('change', function (e) {
+    const file = e.target.files[0]
+    const data = new FormData()
+    data.append('avatar', file)
+    axios({
+      url: 'https://hmajax.itheima.net/api/uploadimg',
+      method: 'post',
+      data,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }).then(({data:{data:{url}}}) => {
+      console.log(url);
+      const img = document.querySelector('img')
+      img.src = url
+    }).catch(err => console.error(err))
+  })
+</script>
+</body>
+</html>
