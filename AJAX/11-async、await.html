@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div class="province"></div>
+  <div class="city"></div>
+  <div class="area"></div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    async function getDefaultArea() {
+      try {
+        const pObj = await axios({url: "https://hmajax.itheima.net/api/province"})
+        const pname = pObj.data.list[0]
+        const cObj = await axios({url: "https://hmajax.itheima.net/api/city", params: {pname}})
+        const cname = cObj.data.list[0]
+        const aObj = await axios({url: "https://hmajax.itheima.net/api/area", params: {pname, cname}})
+        const aname = aObj.data.list[0]
+        document.querySelector('.province').innerHTML = pname
+        document.querySelector('.city').innerHTML = cname
+        document.querySelector('.area').innerHTML = aname
+      } catch (error) {
+        console.dir(error)
+      }
+    }
+    getDefaultArea()
+  </script>
+</body>
+</html>
